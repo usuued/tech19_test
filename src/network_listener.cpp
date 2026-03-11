@@ -1,11 +1,7 @@
 #include "network_listener.h"
+#include "platform_compat.h"
 #include <iostream>
 #include <cstring>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <cerrno>
 
 NetworkListener::NetworkListener(ThreadSafeQueue<std::vector<uint8_t>>& raw_queue,
                                  std::atomic<bool>& shutdown_flag)

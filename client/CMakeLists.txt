@@ -8,4 +8,10 @@ add_executable(test_client
 )
 
 target_include_directories(test_client PRIVATE ../include)
-target_link_libraries(test_client pthread)
+
+# Link libraries
+if(WIN32)
+    target_link_libraries(test_client ws2_32)
+else()
+    target_link_libraries(test_client pthread)
+endif()

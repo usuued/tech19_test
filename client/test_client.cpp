@@ -1,15 +1,22 @@
 #include "protocol.h"
 #include "serialization.h"
+#include "platform_compat.h"
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <chrono>
 #include <random>
 #include <thread>
+
+// Windows doesn't have usleep, provide alternative
+#ifdef _WIN32
+#include <windows.h>
+inline void usleep(unsigned int microseconds) {
+    Sleep(microseconds / 1000);
+}
+#else
+#include <unistd.h>
+#endif
 
 class TestClient {
 public:

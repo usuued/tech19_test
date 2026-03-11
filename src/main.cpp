@@ -3,6 +3,7 @@
 #include "network_listener.h"
 #include "parser.h"
 #include "business_logic.h"
+#include "platform_compat.h"
 
 #include <iostream>
 #include <thread>
@@ -20,16 +21,24 @@ void signal_handler(int signum) {
 }
 
 int main(int argc, char* argv[]) {
+    // Initialize networking (Windows requires Winsock initialization)
+    if (!init_networking()) {
+        std::cerr << "[ERROR] Failed to initialize networking\n";
+        return 1;
+    }
+
     // Parse command line arguments
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <port>\n";
         std::cerr << "Example: " << argv[0] << " 8080\n";
+        cleanup_networking();
         return 1;
     }
 
     uint16_t port = static_cast<uint16_t>(std::atoi(argv[1]));
     if (port == 0) {
         std::cerr << "[ERROR] Invalid port number\n";
+        cleanup_networking();
         return 1;
     }
 
@@ -79,6 +88,9 @@ int main(int argc, char* argv[]) {
     // Wait for business logic thread
     business_thread.join();
     std::cout << "[MAIN] Business thread exited\n";
+
+    // Cleanup networking (Windows requires Winsock cleanup)
+    cleanup_networking();
 
     std::cout << "[MAIN] Clean shutdown complete\n";
     return 0;

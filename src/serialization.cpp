@@ -1,8 +1,7 @@
 #include "serialization.h"
 #include "crc16.h"
+#include "platform_compat.h"
 #include <cstring>
-#include <arpa/inet.h>  // for htons, ntohs
-#include <endian.h>     // for htobe64, be64toh
 
 namespace serialization {
 
