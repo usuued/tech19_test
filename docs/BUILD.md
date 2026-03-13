@@ -50,7 +50,7 @@ cd tech19_test
 mkdir build
 cd build
 cmake ..
-make -j$(nproc)
+make
 ```
 
 ### 3. Run Server
@@ -61,7 +61,7 @@ make -j$(nproc)
 ### 4. Run Test Client (in another terminal)
 ```bash
 cd build
-./client/test_client localhost 8080 --rate 100
+./client/test_client 127.0.0.1 8080 --rate 100
 ```
 
 ---

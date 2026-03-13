@@ -53,6 +53,8 @@ void NetworkListener::run(uint16_t port) {
     std::cout << "[NETWORK] Listening on port " << port << "\n";
 
     // Accept one client (blocking)
+    // This server accepts one client connection and exits when that client disconnects.
+    // To support multiple sequential clients, the accept() call should be in a loop.
     sockaddr_in client_addr{};
     socklen_t client_len = sizeof(client_addr);
     client_fd_ = accept(server_fd_, reinterpret_cast<sockaddr*>(&client_addr), &client_len);

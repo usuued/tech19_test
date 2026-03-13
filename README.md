@@ -13,13 +13,13 @@ Multi-threaded C++ application for parsing continuous binary telemetry streams w
 git clone https://github.com/usuued/tech19_test.git
 cd tech19_test
 mkdir build && cd build
-cmake .. && make -j$(nproc)
+cmake .. && make
 
 # Run server
 ./drone_server 8080
 
 # In another terminal: send test packets
-./client/test_client localhost 8080 --rate 1000
+./client/test_client 127.0.0.1 8080 --rate 1000
 ```
 
 ---
