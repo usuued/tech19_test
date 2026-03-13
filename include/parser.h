@@ -13,8 +13,7 @@ public:
         SEARCHING_HEADER,
         READING_LENGTH,
         READING_PAYLOAD,
-        READING_CRC,
-        VALIDATING
+        READING_CRC
     };
 
     StreamParser(ThreadSafeQueue<std::vector<uint8_t>>& raw_queue,
@@ -38,7 +37,6 @@ private:
     bool read_length();
     bool read_payload();
     bool read_crc();
-    bool validate_packet();
 
     // Resynchronization (shift by one byte)
     void resynchronize();
@@ -50,7 +48,7 @@ private:
     State state_;
     std::vector<uint8_t> buffer_;  // Accumulator buffer
     size_t parse_offset_;
-    size_t header_start_;
+    size_t packet_start_;  // Start of current packet being parsed
     uint16_t expected_payload_size_;
 
     // Statistics

@@ -34,6 +34,12 @@ double net_to_double(uint64_t net_value) {
     return value;
 }
 
+// Helper to append 8-byte value to payload
+static void append_uint64(std::vector<uint8_t>& payload, uint64_t value) {
+    const uint8_t* bytes = reinterpret_cast<const uint8_t*>(&value);
+    payload.insert(payload.end(), bytes, bytes + 8);
+}
+
 std::vector<uint8_t> serialize_telemetry(const protocol::Telemetry& telemetry) {
     std::vector<uint8_t> payload;
 
@@ -42,44 +48,34 @@ std::vector<uint8_t> serialize_telemetry(const protocol::Telemetry& telemetry) {
         return payload;  // Return empty on error
     }
 
-    // drone_id_len (1 byte)
-    uint8_t id_len = static_cast<uint8_t>(telemetry.drone_id.length());
-    payload.push_back(id_len);
-
-    // drone_id (N bytes)
+    // drone_id_len (1 byte) + drone_id (N bytes)
+    payload.push_back(static_cast<uint8_t>(telemetry.drone_id.length()));
     payload.insert(payload.end(), telemetry.drone_id.begin(), telemetry.drone_id.end());
 
-    // latitude (8 bytes, network byte order)
-    uint64_t lat_net = double_to_net(telemetry.latitude);
-    const uint8_t* lat_bytes = reinterpret_cast<const uint8_t*>(&lat_net);
-    payload.insert(payload.end(), lat_bytes, lat_bytes + 8);
-
-    // longitude (8 bytes)
-    uint64_t lon_net = double_to_net(telemetry.longitude);
-    const uint8_t* lon_bytes = reinterpret_cast<const uint8_t*>(&lon_net);
-    payload.insert(payload.end(), lon_bytes, lon_bytes + 8);
-
-    // altitude (8 bytes)
-    uint64_t alt_net = double_to_net(telemetry.altitude);
-    const uint8_t* alt_bytes = reinterpret_cast<const uint8_t*>(&alt_net);
-    payload.insert(payload.end(), alt_bytes, alt_bytes + 8);
-
-    // speed (8 bytes)
-    uint64_t spd_net = double_to_net(telemetry.speed);
-    const uint8_t* spd_bytes = reinterpret_cast<const uint8_t*>(&spd_net);
-    payload.insert(payload.end(), spd_bytes, spd_bytes + 8);
+    // Serialize doubles (latitude, longitude, altitude, speed)
+    append_uint64(payload, double_to_net(telemetry.latitude));
+    append_uint64(payload, double_to_net(telemetry.longitude));
+    append_uint64(payload, double_to_net(telemetry.altitude));
+    append_uint64(payload, double_to_net(telemetry.speed));
 
     // timestamp (8 bytes)
-    uint64_t ts_net = host_to_net64(telemetry.timestamp);
-    const uint8_t* ts_bytes = reinterpret_cast<const uint8_t*>(&ts_net);
-    payload.insert(payload.end(), ts_bytes, ts_bytes + 8);
+    append_uint64(payload, host_to_net64(telemetry.timestamp));
 
     return payload;
 }
 
+// Helper to read 8-byte value from payload
+static uint64_t read_uint64(const uint8_t* data, size_t& offset) {
+    uint64_t value;
+    std::memcpy(&value, data + offset, 8);
+    offset += 8;
+    return value;
+}
+
 bool deserialize_telemetry(const uint8_t* payload, size_t payload_size, protocol::Telemetry& telemetry) {
-    if (payload_size < protocol::DRONE_ID_LEN_SIZE + 5 * protocol::DOUBLE_SIZE + protocol::UINT64_SIZE) {
-        return false;  // Too small
+    // Minimum size: 1 (id_len) + 0 (id) + 4*8 (doubles) + 8 (timestamp) = 41 bytes
+    if (payload_size < 41) {
+        return false;
     }
 
     size_t offset = 0;
@@ -87,46 +83,22 @@ bool deserialize_telemetry(const uint8_t* payload, size_t payload_size, protocol
     // drone_id_len
     uint8_t id_len = payload[offset++];
 
-    if (id_len > protocol::MAX_DRONE_ID_LENGTH) {
-        return false;  // Invalid length
-    }
-
-    if (offset + id_len + 5 * protocol::DOUBLE_SIZE + protocol::UINT64_SIZE > payload_size) {
-        return false;  // Not enough data
+    if (id_len > protocol::MAX_DRONE_ID_LENGTH || offset + id_len + 40 > payload_size) {
+        return false;
     }
 
     // drone_id
     telemetry.drone_id = std::string(reinterpret_cast<const char*>(payload + offset), id_len);
     offset += id_len;
 
-    // latitude
-    uint64_t lat_net;
-    std::memcpy(&lat_net, payload + offset, 8);
-    telemetry.latitude = net_to_double(lat_net);
-    offset += 8;
-
-    // longitude
-    uint64_t lon_net;
-    std::memcpy(&lon_net, payload + offset, 8);
-    telemetry.longitude = net_to_double(lon_net);
-    offset += 8;
-
-    // altitude
-    uint64_t alt_net;
-    std::memcpy(&alt_net, payload + offset, 8);
-    telemetry.altitude = net_to_double(alt_net);
-    offset += 8;
-
-    // speed
-    uint64_t spd_net;
-    std::memcpy(&spd_net, payload + offset, 8);
-    telemetry.speed = net_to_double(spd_net);
-    offset += 8;
+    // Deserialize doubles (latitude, longitude, altitude, speed)
+    telemetry.latitude = net_to_double(read_uint64(payload, offset));
+    telemetry.longitude = net_to_double(read_uint64(payload, offset));
+    telemetry.altitude = net_to_double(read_uint64(payload, offset));
+    telemetry.speed = net_to_double(read_uint64(payload, offset));
 
     // timestamp
-    uint64_t ts_net;
-    std::memcpy(&ts_net, payload + offset, 8);
-    telemetry.timestamp = net_to_host64(ts_net);
+    telemetry.timestamp = net_to_host64(read_uint64(payload, offset));
 
     return true;
 }

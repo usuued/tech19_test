@@ -41,13 +41,15 @@ void BusinessLogic::run() {
         tracker_.update(std::move(telemetry));
         packets_processed_++;
 
-        // Print statistics every 5 seconds
-        auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - last_stats_time_).count();
+        // Print statistics every 5 seconds (check every 1000 packets to reduce overhead)
+        if (packets_processed_ % 1000 == 0) {
+            auto now = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - last_stats_time_).count();
 
-        if (elapsed >= 5) {
-            print_statistics();
-            last_stats_time_ = now;
+            if (elapsed >= 5) {
+                print_statistics();
+                last_stats_time_ = now;
+            }
         }
     }
 

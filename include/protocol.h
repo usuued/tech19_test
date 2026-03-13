@@ -17,14 +17,6 @@ constexpr size_t MAX_PAYLOAD_SIZE = 1024;
 constexpr size_t HEADER_SIZE = 2;
 constexpr size_t LENGTH_SIZE = 2;
 constexpr size_t CRC_SIZE = 2;
-constexpr size_t DRONE_ID_LEN_SIZE = 1;
-constexpr size_t DOUBLE_SIZE = 8;
-constexpr size_t UINT64_SIZE = 8;
-
-// Minimum packet size: HEADER + LENGTH + (ID_LEN + lat + lon + alt + spd + ts) + CRC
-constexpr size_t MIN_PACKET_SIZE = HEADER_SIZE + LENGTH_SIZE +
-                                   (DRONE_ID_LEN_SIZE + 0 + 5 * DOUBLE_SIZE + UINT64_SIZE) +
-                                   CRC_SIZE;
 
 // Telemetry structure (matches assignment)
 struct Telemetry {

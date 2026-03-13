@@ -9,7 +9,7 @@ StreamParser::StreamParser(ThreadSafeQueue<std::vector<uint8_t>>& raw_queue,
                            std::atomic<bool>& shutdown_flag)
     : state_(State::SEARCHING_HEADER),
       parse_offset_(0),
-      header_start_(0),
+      packet_start_(0),
       expected_payload_size_(0),
       packets_processed_(0),
       crc_failures_(0),
@@ -56,8 +56,6 @@ bool StreamParser::process_state() {
             return read_payload();
         case State::READING_CRC:
             return read_crc();
-        case State::VALIDATING:
-            return validate_packet();
     }
     return false;
 }
@@ -66,7 +64,7 @@ bool StreamParser::search_header() {
     // Scan for 0xAA55
     while (parse_offset_ + 1 < buffer_.size()) {
         if (buffer_[parse_offset_] == 0xAA && buffer_[parse_offset_ + 1] == 0x55) {
-            header_start_ = parse_offset_;
+            packet_start_ = parse_offset_;
             parse_offset_ += 2;
             state_ = State::READING_LENGTH;
             return true;
@@ -116,21 +114,17 @@ bool StreamParser::read_crc() {
         return false;  // Need more data
     }
 
-    parse_offset_ += 2;
-    state_ = State::VALIDATING;
-    return true;
-}
-
-bool StreamParser::validate_packet() {
-    // Extract CRC from packet
-    size_t crc_offset = parse_offset_ - 2;
+    // Extract and validate CRC
+    size_t crc_offset = parse_offset_;
     uint16_t received_crc_net;
     std::memcpy(&received_crc_net, buffer_.data() + crc_offset, 2);
     uint16_t received_crc = serialization::net_to_host16(received_crc_net);
 
-    // Compute CRC over HEADER + LENGTH + PAYLOAD
-    size_t crc_data_size = crc_offset - header_start_;
-    uint16_t computed_crc = crc::crc16_ccitt(buffer_.data() + header_start_, crc_data_size);
+    // Compute CRC over HEADER + LENGTH + PAYLOAD (everything before the CRC)
+    size_t crc_data_size = crc_offset - packet_start_;
+    uint16_t computed_crc = crc::crc16_ccitt(buffer_.data() + packet_start_, crc_data_size);
+
+    parse_offset_ += 2;
 
     if (received_crc != computed_crc) {
         std::cerr << "[PARSER ERROR] CRC mismatch. Expected: " << computed_crc
@@ -140,7 +134,7 @@ bool StreamParser::validate_packet() {
     }
 
     // CRC valid - deserialize payload
-    size_t payload_offset = header_start_ + protocol::HEADER_SIZE + protocol::LENGTH_SIZE;
+    size_t payload_offset = packet_start_ + protocol::HEADER_SIZE + protocol::LENGTH_SIZE;
     const uint8_t* payload_ptr = buffer_.data() + payload_offset;
 
     protocol::Telemetry telemetry;
@@ -160,8 +154,8 @@ bool StreamParser::validate_packet() {
 }
 
 void StreamParser::resynchronize() {
-    // Shift forward by ONE byte from header start
-    parse_offset_ = header_start_ + 1;
+    // Shift forward by ONE byte from packet start
+    parse_offset_ = packet_start_ + 1;
     state_ = State::SEARCHING_HEADER;
     crc_failures_++;
 
@@ -171,6 +165,6 @@ void StreamParser::resynchronize() {
 void StreamParser::compact_buffer() {
     // Remove processed bytes
     buffer_.erase(buffer_.begin(), buffer_.begin() + parse_offset_);
-    header_start_ = (header_start_ >= parse_offset_) ? (header_start_ - parse_offset_) : 0;
+    packet_start_ = (packet_start_ >= parse_offset_) ? (packet_start_ - parse_offset_) : 0;
     parse_offset_ = 0;
 }
