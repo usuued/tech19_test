@@ -662,7 +662,7 @@ logging:
   output: /var/log/drone_server.log
 
 database:
-  host: localhost
+  host: 127.0.0.1
   port: 5432
   name: drones
   user: app

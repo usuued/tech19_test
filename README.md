@@ -135,9 +135,9 @@ Options:
   --fragment           Enable packet fragmentation
 
 Examples:
-  ./client/test_client localhost 8080
-  ./client/test_client localhost 8080 --rate 1000 --duration 60
-  ./client/test_client localhost 8080 --corrupt-rate 0.05 --fragment
+  ./client/test_client 127.0.0.1 8080
+  ./client/test_client 127.0.0.1 8080 --rate 1000 --duration 60
+  ./client/test_client 127.0.0.1 8080 --corrupt-rate 0.05 --fragment
 ```
 
 ---
@@ -234,7 +234,7 @@ SIGINT → shutdown_flag = true
 
 **Measurement:**
 ```bash
-./client/test_client localhost 8080 --rate 1000 --duration 60
+./client/test_client 127.0.0.1 8080 --rate 1000 --duration 60
 # Server logs: "Rate: 1050.0 pps" ✓
 ```
 
@@ -245,16 +245,16 @@ SIGINT → shutdown_flag = true
 ### Integration Tests
 ```bash
 # Normal operation
-./client/test_client localhost 8080 --rate 100
+./client/test_client 127.0.0.1 8080 --rate 100
 
 # With corruption (5%)
-./client/test_client localhost 8080 --corrupt-rate 0.05
+./client/test_client 127.0.0.1 8080 --corrupt-rate 0.05
 
 # Fragmentation
-./client/test_client localhost 8080 --fragment
+./client/test_client 127.0.0.1 8080 --fragment
 
 # High throughput
-./client/test_client localhost 8080 --rate 1000 --duration 60
+./client/test_client 127.0.0.1 8080 --rate 1000 --duration 60
 ```
 
 ### Memory Leak Check

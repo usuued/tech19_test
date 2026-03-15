@@ -164,9 +164,9 @@ void print_usage(const char* prog) {
     std::cout << "  --corrupt-rate <r>   Corruption probability 0-1 (default: 0)\n";
     std::cout << "  --fragment           Enable packet fragmentation\n";
     std::cout << "\nExamples:\n";
-    std::cout << "  " << prog << " localhost 8080\n";
-    std::cout << "  " << prog << " localhost 8080 --rate 1000 --duration 60\n";
-    std::cout << "  " << prog << " localhost 8080 --rate 500 --corrupt-rate 0.05\n";
+    std::cout << "  " << prog << " 127.0.0.1 8080\n";
+    std::cout << "  " << prog << " 127.0.0.1 8080 --rate 1000 --duration 60\n";
+    std::cout << "  " << prog << " 127.0.0.1 8080 --rate 500 --corrupt-rate 0.05\n";
 }
 
 int main(int argc, char* argv[]) {
