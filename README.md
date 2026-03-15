@@ -268,9 +268,7 @@ valgrind --leak-check=full ./drone_server 8080
 
 ## Documentation
 
-- **[BUILD.md](docs/BUILD.md)** - Detailed build instructions
 - **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - System architecture & design
-- **[COMMITS.md](docs/COMMITS.md)** - Git commit structure
 - **[DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md)** - Development process
 - **[PRODUCTION.md](docs/PRODUCTION.md)** - Production improvements
 
