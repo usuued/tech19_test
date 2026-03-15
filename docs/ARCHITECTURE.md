@@ -424,11 +424,6 @@ Shared (via queue):
 
 ## Testing Strategy
 
-### Unit Tests
-- **CRC16:** Known values, consistency
-- **Serialization:** Round-trip encode/decode
-- **Endianness:** Verify byte order conversions
-
 ### Integration Tests
 - **Fragmentation:** Split packet across 3 sends
 - **Corruption:** Inject random byte flips

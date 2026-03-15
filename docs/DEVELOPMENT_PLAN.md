@@ -52,50 +52,11 @@ tech19_test/
 │   ├── CMakeLists.txt
 │   └── test_client.cpp                 # Packet generator with corruption
 │
-├── tests/
-│   ├── CMakeLists.txt
-│   └── test_main.cpp                   # Unit tests
-│
 └── docs/
     ├── DEVELOPMENT_PLAN.md             # This file
     ├── ARCHITECTURE.md                 # System architecture
-    ├── COMMITS.md                      # Git commit structure
-    ├── BUILD.md                        # Build instructions
     └── PRODUCTION.md                   # Production improvements
 ```
-
----
-
-## Development Phases
-
-### Phase 1: Foundation (Completed)
-- Project structure with CMake
-- Protocol definitions
-- CRC-16-CCITT implementation
-- Serialization with network byte order
-
-### Phase 2: Core Components (Completed)
-- Thread-safe bounded queue
-- State-machine parser with resynchronization
-- Network listener (TCP server)
-- Business logic (drone tracking + alerts)
-
-### Phase 3: Integration (Completed)
-- Main application with signal handling
-- Thread orchestration
-- Graceful shutdown sequence
-
-### Phase 4: Testing Tools (Completed)
-- Test client with configurable options
-- Corruption injection
-- Fragmentation simulation
-- Unit tests for core components
-
-### Phase 5: Documentation (Completed)
-- Comprehensive README files
-- Architecture diagrams
-- Build instructions
-- Production deployment guide
 
 ---
 
@@ -119,12 +80,6 @@ Simplified design for assignment scope. Production would use epoll for multi-cli
 ---
 
 ## Testing Strategy
-
-### Unit Tests
-- CRC-16-CCITT correctness
-- Endianness conversions
-- Telemetry serialization/deserialization
-- Packet structure validation
 
 ### Integration Tests
 - Normal operation (no corruption)
@@ -175,20 +130,6 @@ Simplified design for assignment scope. Production would use epoll for multi-cli
 
 ---
 
-## Timeline
-
-**Total Development Time:** ~32 hours
-
-- Protocol & serialization: 6h
-- Parser implementation: 8h
-- Threading & networking: 7h
-- Business logic: 3h
-- Test client: 4h
-- Testing & debugging: 2h
-- Documentation: 2h
-
----
-
 ## Next Steps for Production
 
 1. **Multi-client support:** epoll-based event loop
@@ -212,6 +153,4 @@ Simplified design for assignment scope. Production would use epoll for multi-cli
 ✅ Resynchronizes on corruption
 ✅ Alerts on altitude > 120m
 ✅ Alerts on speed > 50 m/s
-✅ Test client works with all modes
-✅ Unit tests pass
 ✅ Documentation complete
