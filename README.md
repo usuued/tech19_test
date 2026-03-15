@@ -242,14 +242,6 @@ SIGINT → shutdown_flag = true
 
 ## Testing
 
-### Unit Tests
-```bash
-cd build
-cmake -DBUILD_TESTS=ON ..
-make
-ctest --verbose
-```
-
 ### Integration Tests
 ```bash
 # Normal operation
@@ -343,9 +335,3 @@ tech19_test/
 MIT License
 
 ---
-
-## Author
-
-**Uriya Suued**
-Tech19 C++ Embedded Developer Assignment
-January 2025
